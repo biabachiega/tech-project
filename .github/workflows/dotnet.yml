@@ -18,7 +18,7 @@ jobs:
           POSTGRES_PASSWORD: 1234
           POSTGRES_DB: postgres
         ports:
-          - 5433:5432  # Certifique-se que a porta foi atualizada aqui também
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -43,4 +43,5 @@ jobs:
 
     - name: Run tests
       working-directory: src
-      run: docker-compose run --rm projetotech dotnet test TestesFaseUm/TestesFaseUm.Tests.csproj
+      run: |
+        docker-compose run --rm projetotech dotnet test TestesFaseUm/TestesFaseUm.Tests.csproj
