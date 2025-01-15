@@ -19,7 +19,7 @@ namespace IntegrationTests
         public IntegrationTests()
         {
             _options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseNpgsql("Host=localhost;Port=5433;Database=postgres;Username=postgres;Password=1234")
+                .UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=1234")
                 .Options;
             _context = new TestIntegrationDbContextRepository(_options);
             _controller = new ContatosController(_context);
@@ -32,7 +32,7 @@ namespace IntegrationTests
         {
             try
             {
-                using (var conn = new NpgsqlConnection("Host=localhost;Port=5433;Database=postgres;Username=postgres;Password=1234"))
+                using (var conn = new NpgsqlConnection("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=1234"))
                 {
                     await conn.OpenAsync();
                 }
