@@ -1,0 +1,32 @@
+version: '3.4'
+
+services:
+  projetotech:
+    image: ${DOCKER_REGISTRY-}projetotech
+    build:
+      context: .
+      dockerfile: WebApplication1/Dockerfile
+    depends_on:
+      - postgres
+    networks:
+      - mynetwork
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+
+volumes:
+  pgdata:
+
+networks:
+  mynetwork:
