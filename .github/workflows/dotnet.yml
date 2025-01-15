@@ -44,3 +44,6 @@ jobs:
     - name: Run tests
       working-directory: src
       run: dotnet test TestesFaseUm/TestesFaseUm.Tests.csproj
+    
+    - name: Integration Test 
+      run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity normal
