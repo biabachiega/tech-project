@@ -43,4 +43,4 @@ jobs:
 
     - name: Run tests
       working-directory: src
-      run: docker-compose run --rm projetotech dotnet test TestesFaseUm/TestesFaseUm.Tests.csproj
+      run: dotnet test TestesFaseUm/TestesFaseUm.Tests.csproj
