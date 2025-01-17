@@ -1,0 +1,32 @@
+# Configuração global
+global:
+  scrape_interval: 15s # Intervalo de coleta definido para cada 15 segundos
+  evaluation_interval: 15s # Avaliar regras a cada 15 segundos
+
+# Configuração do Alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            # - alertmanager:9093
+
+# Carregar regras uma vez e avaliá-las periodicamente de acordo com o 'evaluation_interval'
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# Configuração de coleta
+scrape_configs:
+  # Coleta das próprias métricas do Prometheus
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Coleta das métricas da sua aplicação
+  - job_name: "minha_aplicacao"
+    static_configs:
+      - targets: ["projetotech:8080"]
+    metrics_path: "/metrics"
+    scheme: "http"
+    scrape_interval: 15s
+    scrape_timeout: 10s

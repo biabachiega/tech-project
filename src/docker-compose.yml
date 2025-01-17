@@ -10,6 +10,11 @@ services:
       - postgres
     networks:
       - mynetwork
+    ports:
+      - "8080:8080" 
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:8080 
 
   postgres:
     image: postgres:latest
@@ -22,6 +27,15 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - /run/desktop/mnt/host/d/Git/Tech/src/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9091:9090"
     networks:
       - mynetwork
 

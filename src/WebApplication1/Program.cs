@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProjetoTech.Services;
+using Prometheus;  // Importando o namespace do Prometheus
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,8 +34,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Adicionando middleware Prometheus para exposição de métricas
+app.UseRouting();
+app.UseHttpMetrics();  // Middleware para métricas HTTP
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapMetrics();  // Rota para métricas do Prometheus
+});
 
 app.Run();
