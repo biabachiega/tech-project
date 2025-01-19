@@ -35,7 +35,7 @@ services:
     volumes:
       - /run/desktop/mnt/host/d/Git/Tech/src/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9091:9090"
+      - "9090:9090"
     networks:
       - mynetwork
 
@@ -45,11 +45,14 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
     networks:
       - mynetwork
 
 volumes:
   pgdata:
+  grafana_data:
 
 networks:
   mynetwork:
