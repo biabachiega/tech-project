@@ -6,7 +6,6 @@ using ProjetoTech.Services;
 using Prometheus;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
-using ProjetoTech.Filters;  // Certifique-se de adicionar esta linha
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,9 +21,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-
-    // Adicione a operação personalizada para o endpoint /metrics
-    c.DocumentFilter<MetricsEndpointDocumentFilter>();
 });
 
 var app = builder.Build();
