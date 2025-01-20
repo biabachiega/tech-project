@@ -1,5 +1,3 @@
-version: '3.4'
-
 services:
   projetotech:
     image: projetotech
@@ -33,7 +31,7 @@ services:
   prometheus:
     image: prom/prometheus
     volumes:
-      - /run/desktop/mnt/host/d/Git/Tech/src/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     networks:
