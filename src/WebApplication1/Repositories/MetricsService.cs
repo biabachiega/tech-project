@@ -23,6 +23,6 @@ public class MetricsService
     private double GetMemoryUsage()
     {
         var process = Process.GetCurrentProcess();
-        return process.WorkingSet64 / (1024.0 * 1024.0); // Retorna o uso de memória em MB
+        return process.WorkingSet64 / (1024.0 * 1024.0);
     }
 }
