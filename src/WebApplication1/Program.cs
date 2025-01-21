@@ -48,7 +48,7 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapMetrics();  // Rota para métricas do Prometheus
+    endpoints.MapMetrics();
 });
 
 app.Run();
