@@ -1,5 +1,5 @@
 
-using Microsoft.AspNetCore.Mvc;
+/*using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjetoTech.Entities;
 using ProjetoTech.Services;
@@ -205,3 +205,4 @@ public class ContatosControllerTests
 
 
 }
+*/

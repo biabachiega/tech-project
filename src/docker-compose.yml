@@ -14,6 +14,36 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://*:8080
 
+  cadastroservice:
+    image: cadastroservice
+    build:
+        context: .
+        dockerfile: CadastroService/Dockerfile
+    depends_on:
+        - postgres
+    networks:
+        - mynetwork
+    ports:
+        - "9000:9000"
+    environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ASPNETCORE_URLS=http://*:9000
+
+  consultaservice:
+    image: consultaservice
+    build:
+        context: .
+        dockerfile: ConsultaService/Dockerfile
+    depends_on:
+        - postgres
+    networks:
+        - mynetwork
+    ports:
+        - "9010:9010"
+    environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ASPNETCORE_URLS=http://*:9010
+
   postgres:
     image: postgres:latest
     restart: always

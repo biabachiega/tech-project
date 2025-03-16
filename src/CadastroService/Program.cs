@@ -1,11 +1,6 @@
+using CadastroService.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using ProjetoTech.Services;
-using Prometheus;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,35 +15,22 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Serviço de Administação e Monitoramento", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Serviço de Cadastro", Version = "v1" });
 });
 
 var app = builder.Build();
 
-// Apply migrations at startup
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
-}
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Adicionando middleware Prometheus para exposição de métricas
 app.UseRouting();
-app.UseMetricServer();
-app.UseHttpMetrics();
-app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapMetrics();
 });
 
 app.Run();

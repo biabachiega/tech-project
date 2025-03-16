@@ -18,6 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CadastroService\CadastroService.csproj" />
+    <ProjectReference Include="..\ConsultaService\ConsultaService.csproj" />
     <ProjectReference Include="..\WebApplication1\ProjetoTech.csproj" />
   </ItemGroup>
 
