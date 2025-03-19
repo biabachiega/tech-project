@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CadastroService.Entities;
 using CadastroService.Services;
+using RabbitMQ.Client;
+using System.Text.Json;
+using System.Text;
 
 namespace CadastroService.Controllers
 {
@@ -11,57 +14,55 @@ namespace CadastroService.Controllers
     public class ContatosController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
-
-        public ContatosController(ApplicationDbContext dbContext)
+        private readonly RabbitMqService _rabbitMqService;
+        public ContatosController(ApplicationDbContext dbContext, RabbitMqService rabbitMqService)
         {
             _dbContext = dbContext;
+            _rabbitMqService = rabbitMqService; // Agora ele será passado pela injeção de dependência
         }
+
+
 
         [HttpPost]
-        public async Task<IActionResult> CreateContact([FromBody] ContatosRequest contatos)
+        public IActionResult CreateContact([FromBody] ContatosRequest contatos)
         {
-            if (!ModelState.IsValid)
             {
-                return BadRequest(new ApiResponse<ContatosResponse>
+                if (!ModelState.IsValid)
                 {
-                    Message = "O estado do modelo nao e valido",
-                    HasError = true
-                });
+                    return BadRequest(new ApiResponse<ContatosResponse>
+                    {
+                        Message = "O estado do modelo nao é valido",
+                        HasError = true
+                    });
+                }
+
+                try
+                {
+                    // Serializa o contato
+                    string message = JsonSerializer.Serialize(contatos);
+
+                    // Envia para o RabbitMQ
+                    _rabbitMqService.SendMessage("criaContato", message);
+
+                    return Ok(new ApiResponse<ContatosRequest>
+                    {
+                        Message = "Dados inseridos na fila com sucesso! E serão processados em breve",
+                        HasError = false,
+                        Data = contatos
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new ApiResponse<ContatosRequest>
+                    {
+                        Message = $"Erro ao inserir dados na fila: {ex.Message}",
+                        HasError = true
+                    });
+                }
             }
 
-            try
-            {
-                var novoContato = new ContatosResponse
-                {
-                    id = Guid.NewGuid(),
-                    nome = contatos.nome,
-                    email = contatos.email,
-                    telefone = contatos.telefone
-                };
-
-                _dbContext.Set<ContatosResponse>().Add(novoContato);
-                await _dbContext.SaveChangesAsync();
-
-                return Ok(new ApiResponse<ContatosResponse>
-                {
-                    Message = "Dados inseridos com sucesso!",
-                    HasError = false,
-                    Data = novoContato
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ApiResponse<ContatosResponse>
-                {
-                    Message = $"Erro ao inserir dados: {ex.Message}",
-                    HasError = true
-                });
-            }
         }
-
-
-
-        [HttpDelete("deleteById/{id}")]
+            [HttpDelete("deleteById/{id}")]
         public IActionResult DeleteResourceById(Guid id)
         {
             try

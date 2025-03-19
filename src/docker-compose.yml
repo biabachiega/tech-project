@@ -1,4 +1,14 @@
 services:
+  workerservice:
+    build:
+      context: .
+      dockerfile: WorkerService/Dockerfile
+    depends_on:
+      - rabbitmq
+      - postgres
+    networks:
+      - mynetwork
+
   projetotech:
     image: projetotech
     build:
@@ -17,32 +27,34 @@ services:
   cadastroservice:
     image: cadastroservice
     build:
-        context: .
-        dockerfile: CadastroService/Dockerfile
+      context: .
+      dockerfile: CadastroService/Dockerfile
     depends_on:
-        - postgres
+      - postgres
+      - rabbitmq
     networks:
-        - mynetwork
+      - mynetwork
     ports:
-        - "9000:9000"
+      - "9000:9000"
     environment:
-        - ASPNETCORE_ENVIRONMENT=Development
-        - ASPNETCORE_URLS=http://*:9000
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:9000
 
   consultaservice:
     image: consultaservice
     build:
-        context: .
-        dockerfile: ConsultaService/Dockerfile
+      context: .
+      dockerfile: ConsultaService/Dockerfile
     depends_on:
-        - postgres
+      - postgres
+      - rabbitmq
     networks:
-        - mynetwork
+      - mynetwork
     ports:
-        - "9010:9010"
+      - "9010:9010"
     environment:
-        - ASPNETCORE_ENVIRONMENT=Development
-        - ASPNETCORE_URLS=http://*:9010
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:9010
 
   postgres:
     image: postgres:latest
@@ -75,6 +87,17 @@ services:
       - prometheus
     volumes:
       - grafana_data:/var/lib/grafana
+    networks:
+      - mynetwork
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     networks:
       - mynetwork
 

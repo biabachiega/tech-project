@@ -11,9 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestesFaseUm.Tests", "Teste
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{9FD76C90-8FFD-4EE3-ABD9-551D681E5325}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CadastroService", "CadastroService\CadastroService.csproj", "{3A776DB9-B966-4D30-B749-AA1A52612A42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CadastroService", "CadastroService\CadastroService.csproj", "{3A776DB9-B966-4D30-B749-AA1A52612A42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsultaService", "ConsultaService\ConsultaService.csproj", "{0A0848D7-6A2E-4238-AD23-8A19445ADAF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsultaService", "ConsultaService\ConsultaService.csproj", "{0A0848D7-6A2E-4238-AD23-8A19445ADAF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerService", "WorkerService\WorkerService.csproj", "{21242F3D-8D03-4BBB-ADE5-66D733A4CD6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{0A0848D7-6A2E-4238-AD23-8A19445ADAF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A0848D7-6A2E-4238-AD23-8A19445ADAF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A0848D7-6A2E-4238-AD23-8A19445ADAF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21242F3D-8D03-4BBB-ADE5-66D733A4CD6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21242F3D-8D03-4BBB-ADE5-66D733A4CD6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21242F3D-8D03-4BBB-ADE5-66D733A4CD6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21242F3D-8D03-4BBB-ADE5-66D733A4CD6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

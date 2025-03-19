@@ -1,11 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using ProjetoTech.Services;
 using Prometheus;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
