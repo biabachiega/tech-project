@@ -32,6 +32,7 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+      - workerservice
     networks:
       - mynetwork
     ports:

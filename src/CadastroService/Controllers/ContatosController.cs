@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using CadastroService.Entities;
 using CadastroService.Services;
-using RabbitMQ.Client;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using System.Text;
 
 namespace CadastroService.Controllers
 {
@@ -57,6 +54,44 @@ namespace CadastroService.Controllers
                         Message = "Dados inseridos na fila com sucesso! E serão processados em breve",
                         HasError = false,
                         Data = contatos
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new ApiResponse<ContatosRequest>
+                    {
+                        Message = $"Erro ao inserir dados na fila: {ex.Message}",
+                        HasError = true
+                    });
+                }
+            }
+
+        }
+        [HttpPost("ErroDLQ")]
+        public IActionResult ErroDlq([FromBody] ContatosRequest contatos)
+        {
+            {
+
+                try
+                {
+                    // Serializa o contato
+                    string contatosJson = JsonSerializer.Serialize(contatos);
+                    var messageObject = new
+                    {
+                        action = "erro",
+                        data = JsonSerializer.Deserialize<object>(contatosJson) // Desserialize para incluir no novo objeto
+                    };
+
+                    string message = JsonSerializer.Serialize(messageObject); // Serialize o objeto completo
+
+
+                    // Envia para o RabbitMQ
+                    _rabbitMqService.SendMessage("contatosQueue", message);
+
+                    return Ok(new ApiResponse<ContatosRequest>
+                    {
+                        Message = "Dados inseridos na fila com sucesso! E serão processados enviados para fila dlq na sequenacia",
+
                     });
                 }
                 catch (Exception ex)

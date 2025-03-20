@@ -1,6 +1,5 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
 using System.Text;
 using System.Text.Json;
 using WorkerService.Entities;
@@ -20,7 +19,7 @@ namespace WorkerService.Services
         {
             var factory = new ConnectionFactory()
             {
-                HostName = "rabbitmq", 
+                HostName = "rabbitmq",
                 UserName = "guest",
                 Password = "guest"
             };
@@ -28,11 +27,23 @@ namespace WorkerService.Services
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
 
-            channel.QueueDeclare(queue: "contatosQueue",
-                                 durable: false,
+            // Declaração da Dead Letter Queue (DLQ)
+            channel.QueueDeclare(queue: "contatosQueue.dlq",
+                                 durable: true, // A DLQ será durável
                                  exclusive: false,
                                  autoDelete: false,
                                  arguments: null);
+
+            // Declaração da fila principal com ligação à DLQ
+            channel.QueueDeclare(queue: "contatosQueue",
+                                 durable: true, // A fila principal será durável
+                                 exclusive: false,
+                                 autoDelete: false,
+                                 arguments: new Dictionary<string, object>
+                                 {
+                                     { "x-dead-letter-exchange", "" },
+                                     { "x-dead-letter-routing-key", "contatosQueue.dlq" }
+                                 });
 
             Console.WriteLine("Consumer iniciado, aguardando mensagens...");
 
@@ -47,27 +58,44 @@ namespace WorkerService.Services
                 {
                     var deserializedMessage = JsonSerializer.Deserialize<Message>(message, new JsonSerializerOptions
                     {
-                        PropertyNameCaseInsensitive = true // Ignorar sensibilidade ao case
+                        PropertyNameCaseInsensitive = true // Ignorar sensibilidade a maiúsculas/minúsculas
                     });
-                    Console.WriteLine(deserializedMessage);
+
                     if (deserializedMessage != null)
                     {
-                       
                         var action = deserializedMessage.Action;
                         var data = deserializedMessage.Data;
-                        Console.WriteLine(action);
-                        Console.WriteLine(data);
-                        // Processar as ações baseadas na mensagem
-                        await ProcessarMensagemAsync(action, data);
+
+                        Console.WriteLine($"Ação: {action}");
+                        Console.WriteLine($"Dados: Nome={data?.nome}, Email={data?.email}, Telefone={data?.telefone}");
+
+                        // Processar mensagens válidas
+                        var processedSuccessfully = await ProcessarMensagemAsync(action, data);
+
+                        if (processedSuccessfully)
+                        {
+                            // Confirma processamento bem-sucedido da mensagem
+                            channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                        }
+                        else
+                        {
+                            // Rejeita mensagens com ações inválidas
+                            Console.WriteLine($"Ação inválida: {action}. Enviando mensagem para a DLQ.");
+                            channel.BasicReject(deliveryTag: ea.DeliveryTag, requeue: false);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Erro ao processar mensagem: {ex.Message}");
+
+                    // Rejeitar mensagem e enviar para a DLQ
+                    channel.BasicReject(deliveryTag: ea.DeliveryTag, requeue: false);
                 }
             };
 
-            channel.BasicConsume(queue: "contatosQueue", autoAck: true, consumer: consumer);
+            // Consumir a fila principal
+            channel.BasicConsume(queue: "contatosQueue", autoAck: false, consumer: consumer);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -75,39 +103,62 @@ namespace WorkerService.Services
             }
         }
 
-        private async Task ProcessarMensagemAsync(string action, ContatosResponse data)
+        private async Task<bool> ProcessarMensagemAsync(string action, ContatosResponse data)
         {
             using var scope = _scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            if (action == "create")
+            try
             {
-                dbContext.Contatos.Add(data);
-                await dbContext.SaveChangesAsync();
-                Console.WriteLine($"Contato criado: Nome={data.nome}, Email={data.email}");
-            }
-            else if (action == "update")
-            {
-                var contato = await dbContext.Contatos.FindAsync(data.id);
-                if (contato != null)
+                if (action == "create")
                 {
-                    contato.nome = data.nome ?? contato.nome;
-                    contato.email = data.email ?? contato.email;
-                    contato.telefone = data.telefone ?? contato.telefone;
+                    dbContext.Contatos.Add(data);
+                    await dbContext.SaveChangesAsync();
+                    Console.WriteLine($"Contato criado: Nome={data.nome}, Email={data.email}");
+                }
+                else if (action == "update")
+                {
+                    var contato = await dbContext.Contatos.FindAsync(data.id);
+                    if (contato != null)
+                    {
+                        contato.nome = data.nome ?? contato.nome;
+                        contato.email = data.email ?? contato.email;
+                        contato.telefone = data.telefone ?? contato.telefone;
 
-                    await dbContext.SaveChangesAsync();
-                    Console.WriteLine($"Contato atualizado: Nome={contato.nome}, Email={contato.email}");
+                        await dbContext.SaveChangesAsync();
+                        Console.WriteLine($"Contato atualizado: Nome={contato.nome}, Email={contato.email}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Contato não encontrado para atualização: Id={data.id}");
+                    }
                 }
-            }
-            else if (action == "delete")
-            {
-                var contato = await dbContext.Contatos.FindAsync(data.id);
-                if (contato != null)
+                else if (action == "delete")
                 {
-                    dbContext.Contatos.Remove(contato);
-                    await dbContext.SaveChangesAsync();
-                    Console.WriteLine($"Contato excluído: Id={data.id}");
+                    var contato = await dbContext.Contatos.FindAsync(data.id);
+                    if (contato != null)
+                    {
+                        dbContext.Contatos.Remove(contato);
+                        await dbContext.SaveChangesAsync();
+                        Console.WriteLine($"Contato excluído: Id={data.id}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Contato não encontrado para exclusão: Id={data.id}");
+                    }
                 }
+                else
+                {
+                    // Retorna falso para ações inválidas
+                    return false;
+                }
+
+                return true; // Processado com sucesso
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro no processamento da mensagem: {ex.Message}");
+                throw; // Rejeitar a mensagem e enviar para a DLQ
             }
         }
     }
