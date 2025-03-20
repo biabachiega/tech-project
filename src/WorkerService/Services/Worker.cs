@@ -1,10 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System;
 using System.Text;
 using System.Text.Json;
 using WorkerService.Entities;
-using WorkerService.Services;
 
 namespace WorkerService.Services
 {
@@ -21,7 +20,7 @@ namespace WorkerService.Services
         {
             var factory = new ConnectionFactory()
             {
-                HostName = "rabbitmq", // Use "localhost" caso esteja rodando fora do Docker
+                HostName = "rabbitmq", 
                 UserName = "guest",
                 Password = "guest"
             };
@@ -29,7 +28,7 @@ namespace WorkerService.Services
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
 
-            channel.QueueDeclare(queue: "criaContato",
+            channel.QueueDeclare(queue: "contatosQueue",
                                  durable: false,
                                  exclusive: false,
                                  autoDelete: false,
@@ -44,15 +43,31 @@ namespace WorkerService.Services
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
 
-                // Deserializar a mensagem recebida
-                var contato = JsonSerializer.Deserialize<ContatosResponse>(message);
-                Console.WriteLine($"Mensagem recebida: Nome={contato.nome}, Email={contato.email}, Telefone={contato.telefone}");
-
-                // Persistir no banco de dados
-                await PersistirContatoAsync(contato);
+                try
+                {
+                    var deserializedMessage = JsonSerializer.Deserialize<Message>(message, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true // Ignorar sensibilidade ao case
+                    });
+                    Console.WriteLine(deserializedMessage);
+                    if (deserializedMessage != null)
+                    {
+                       
+                        var action = deserializedMessage.Action;
+                        var data = deserializedMessage.Data;
+                        Console.WriteLine(action);
+                        Console.WriteLine(data);
+                        // Processar as ações baseadas na mensagem
+                        await ProcessarMensagemAsync(action, data);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao processar mensagem: {ex.Message}");
+                }
             };
 
-            channel.BasicConsume(queue: "criaContato", autoAck: true, consumer: consumer);
+            channel.BasicConsume(queue: "contatosQueue", autoAck: true, consumer: consumer);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -60,17 +75,40 @@ namespace WorkerService.Services
             }
         }
 
-        private async Task PersistirContatoAsync(ContatosResponse contato)
+        private async Task ProcessarMensagemAsync(string action, ContatosResponse data)
         {
-            // Cria um escopo para obter o `ApplicationDbContext`
             using var scope = _scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            // Salva o contato no banco de dados
-            dbContext.Contatos.Add(contato);
-            await dbContext.SaveChangesAsync();
+            if (action == "create")
+            {
+                dbContext.Contatos.Add(data);
+                await dbContext.SaveChangesAsync();
+                Console.WriteLine($"Contato criado: Nome={data.nome}, Email={data.email}");
+            }
+            else if (action == "update")
+            {
+                var contato = await dbContext.Contatos.FindAsync(data.id);
+                if (contato != null)
+                {
+                    contato.nome = data.nome ?? contato.nome;
+                    contato.email = data.email ?? contato.email;
+                    contato.telefone = data.telefone ?? contato.telefone;
 
-            Console.WriteLine($"Contato persistido no banco: Nome={contato.nome}, Email={contato.email}");
+                    await dbContext.SaveChangesAsync();
+                    Console.WriteLine($"Contato atualizado: Nome={contato.nome}, Email={contato.email}");
+                }
+            }
+            else if (action == "delete")
+            {
+                var contato = await dbContext.Contatos.FindAsync(data.id);
+                if (contato != null)
+                {
+                    dbContext.Contatos.Remove(contato);
+                    await dbContext.SaveChangesAsync();
+                    Console.WriteLine($"Contato excluído: Id={data.id}");
+                }
+            }
         }
     }
 }

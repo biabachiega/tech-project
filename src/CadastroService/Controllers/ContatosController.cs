@@ -39,10 +39,18 @@ namespace CadastroService.Controllers
                 try
                 {
                     // Serializa o contato
-                    string message = JsonSerializer.Serialize(contatos);
+                    string contatosJson = JsonSerializer.Serialize(contatos);
+                    var messageObject = new
+                    {
+                        action = "create",
+                        data = JsonSerializer.Deserialize<object>(contatosJson) // Desserialize para incluir no novo objeto
+                    };
+                   
+                    string message = JsonSerializer.Serialize(messageObject); // Serialize o objeto completo
+
 
                     // Envia para o RabbitMQ
-                    _rabbitMqService.SendMessage("criaContato", message);
+                    _rabbitMqService.SendMessage("contatosQueue", message);
 
                     return Ok(new ApiResponse<ContatosRequest>
                     {
@@ -62,7 +70,7 @@ namespace CadastroService.Controllers
             }
 
         }
-            [HttpDelete("deleteById/{id}")]
+        [HttpDelete("deleteById/{id}")]
         public IActionResult DeleteResourceById(Guid id)
         {
             try
@@ -70,14 +78,18 @@ namespace CadastroService.Controllers
                 var entityToDelete = _dbContext.Contatos.FirstOrDefault(c => c.id == id);
                 if (entityToDelete != null)
                 {
-                    _dbContext.Contatos.Remove(entityToDelete);
-                    _dbContext.SaveChanges();
+                    string message = JsonSerializer.Serialize(new
+                    {
+                        action = "delete",
+                        data = new { id = id }
+                    });
+
+                    _rabbitMqService.SendMessage("contatosQueue", message); // Envia para a fila "contatosQueue"
 
                     return Ok(new ApiResponse<ContatosResponse>
                     {
-                        Message = $"Contato com Id {id} excluido com sucesso!",
-                        HasError = false,
-                        Data = entityToDelete
+                        Message = $"Contato com Id enviado para fila de exclusão com sucesso!",
+                        HasError = false
                     });
                 }
                 else
@@ -93,7 +105,7 @@ namespace CadastroService.Controllers
             {
                 return BadRequest(new ApiResponse<ContatosResponse>
                 {
-                    Message = $"Erro ao excluir contato: {ex.Message}",
+                    Message = $"Erro ao enviar para fila de exclusão de contato: {ex.Message}",
                     HasError = true
                 });
             }
@@ -122,25 +134,31 @@ namespace CadastroService.Controllers
                         HasError = true
                     });
                 }
+                string message = JsonSerializer.Serialize(new
+                {
+                    action = "update",
+                    data = new
+                    {
+                        id = id,
+                        nome = updatedResource.nome,
+                        email = updatedResource.email,
+                        telefone = updatedResource.telefone
+                    }
+                });
 
-                existingResource.nome = updatedResource.nome ?? existingResource.nome;
-                existingResource.telefone = updatedResource.telefone ?? existingResource.telefone;
-                existingResource.email = updatedResource.email ?? existingResource.email;
-
-                _dbContext.SaveChanges();
+                _rabbitMqService.SendMessage("contatosQueue", message); // Envia para a fila "contatosQueue"
 
                 return Ok(new ApiResponse<ContatosResponse>
                 {
-                    Message = $"Contato com Id {id} atualizado com sucesso!",
+                    Message = "Dados de atualização enviados para a fila com sucesso!",
                     HasError = false,
-                    Data = existingResource
                 });
             }
             catch (Exception ex)
             {
                 return BadRequest(new ApiResponse<ContatosResponse>
                 {
-                    Message = $"Erro ao atualizar contato: {ex.Message}",
+                    Message = $"Erro ao enviar dados de atualização para a fila: {ex.Message}",
                     HasError = true
                 });
             }
