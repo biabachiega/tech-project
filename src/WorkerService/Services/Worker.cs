@@ -17,89 +17,89 @@ namespace WorkerService.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var factory = new ConnectionFactory()
-            {
-                HostName = "rabbitmq",
-                UserName = "guest",
-                Password = "guest"
-            };
-
-            using var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
-
-            // Declaração da Dead Letter Queue (DLQ)
-            channel.QueueDeclare(queue: "contatosQueue.dlq",
-                                 durable: true, // A DLQ será durável
-                                 exclusive: false,
-                                 autoDelete: false,
-                                 arguments: null);
-
-            // Declaração da fila principal com ligação à DLQ
-            channel.QueueDeclare(queue: "contatosQueue",
-                                 durable: true, // A fila principal será durável
-                                 exclusive: false,
-                                 autoDelete: false,
-                                 arguments: new Dictionary<string, object>
-                                 {
-                                     { "x-dead-letter-exchange", "" },
-                                     { "x-dead-letter-routing-key", "contatosQueue.dlq" }
-                                 });
-
-            Console.WriteLine("Consumer iniciado, aguardando mensagens...");
-
-            var consumer = new EventingBasicConsumer(channel);
-
-            consumer.Received += async (model, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-
-                try
-                {
-                    var deserializedMessage = JsonSerializer.Deserialize<Message>(message, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true // Ignorar sensibilidade a maiúsculas/minúsculas
-                    });
-
-                    if (deserializedMessage != null)
-                    {
-                        var action = deserializedMessage.Action;
-                        var data = deserializedMessage.Data;
-
-                        Console.WriteLine($"Ação: {action}");
-                        Console.WriteLine($"Dados: Nome={data?.nome}, Email={data?.email}, Telefone={data?.telefone}");
-
-                        // Processar mensagens válidas
-                        var processedSuccessfully = await ProcessarMensagemAsync(action, data);
-
-                        if (processedSuccessfully)
-                        {
-                            // Confirma processamento bem-sucedido da mensagem
-                            channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-                        }
-                        else
-                        {
-                            // Rejeita mensagens com ações inválidas
-                            Console.WriteLine($"Ação inválida: {action}. Enviando mensagem para a DLQ.");
-                            channel.BasicReject(deliveryTag: ea.DeliveryTag, requeue: false);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Erro ao processar mensagem: {ex.Message}");
-
-                    // Rejeitar mensagem e enviar para a DLQ
-                    channel.BasicReject(deliveryTag: ea.DeliveryTag, requeue: false);
-                }
-            };
-
-            // Consumir a fila principal
-            channel.BasicConsume(queue: "contatosQueue", autoAck: false, consumer: consumer);
-
+            
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(1000, stoppingToken);
+                var factory = new ConnectionFactory()
+                {
+                    HostName = "rabbitmq",
+                    UserName = "guest",
+                    Password = "guest"
+                };
+
+                using var connection = factory.CreateConnection();
+                using var channel = connection.CreateModel();
+
+                // Declaração da Dead Letter Queue (DLQ)
+                channel.QueueDeclare(queue: "contatosQueue.dlq",
+                                     durable: true, // A DLQ será durável
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                // Declaração da fila principal com ligação à DLQ
+                channel.QueueDeclare(queue: "contatosQueue",
+                                     durable: true, // A fila principal será durável
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: new Dictionary<string, object>
+                                     {
+                                     { "x-dead-letter-exchange", "" },
+                                     { "x-dead-letter-routing-key", "contatosQueue.dlq" }
+                                     });
+
+                Console.WriteLine("Consumer iniciado, aguardando mensagens...");
+
+                var consumer = new EventingBasicConsumer(channel);
+
+                consumer.Received += async (model, ea) =>
+                {
+                    var body = ea.Body.ToArray();
+                    var message = Encoding.UTF8.GetString(body);
+
+                    try
+                    {
+                        var deserializedMessage = JsonSerializer.Deserialize<Message>(message, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true // Ignorar sensibilidade a maiúsculas/minúsculas
+                        });
+
+                        if (deserializedMessage != null)
+                        {
+                            var action = deserializedMessage.Action;
+                            var data = deserializedMessage.Data;
+
+                            Console.WriteLine($"Ação: {action}");
+                            Console.WriteLine($"Dados: Nome={data?.nome}, Email={data?.email}, Telefone={data?.telefone}");
+
+                            // Processar mensagens válidas
+                            var processedSuccessfully = await ProcessarMensagemAsync(action, data);
+
+                            if (processedSuccessfully)
+                            {
+                                // Confirma processamento bem-sucedido da mensagem
+                                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                            }
+                            else
+                            {
+                                // Rejeita mensagens com ações inválidas
+                                Console.WriteLine($"Ação inválida: {action}. Enviando mensagem para a DLQ.");
+                                channel.BasicReject(deliveryTag: ea.DeliveryTag, requeue: false);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erro ao processar mensagem: {ex.Message}");
+
+                        // Rejeitar mensagem e enviar para a DLQ
+                        channel.BasicReject(deliveryTag: ea.DeliveryTag, requeue: false);
+                    }
+                };
+
+                // Consumir a fila principal
+                channel.BasicConsume(queue: "contatosQueue", autoAck: false, consumer: consumer);
+                await Task.Delay(60000, stoppingToken);
             }
         }
 
@@ -112,6 +112,7 @@ namespace WorkerService.Services
             {
                 if (action == "create")
                 {
+                    //throw new Exception("Teste DLQ");
                     dbContext.Contatos.Add(data);
                     await dbContext.SaveChangesAsync();
                     Console.WriteLine($"Contato criado: Nome={data.nome}, Email={data.email}");

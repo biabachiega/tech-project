@@ -1,4 +1,7 @@
+version: '3.8'
+
 services:
+  # Worker Service - Serviço de trabalho
   workerservice:
     build:
       context: .
@@ -8,9 +11,13 @@ services:
       - postgres
     networks:
       - mynetwork
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RABBITMQ_HOST=rabbitmq
+      - POSTGRES_HOST=postgres
 
+  # Projetotech (exemplo de aplicação)
   projetotech:
-    image: projetotech
     build:
       context: .
       dockerfile: WebApplication1/Dockerfile
@@ -19,13 +26,15 @@ services:
     networks:
       - mynetwork
     ports:
-      - "8080:8080"
+      - "8080:8080"   # Expondo a aplicação para a porta 8080
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://*:8080
+      - RABBITMQ_HOST=rabbitmq
+      - POSTGRES_HOST=postgres
 
+  # Cadastro Service
   cadastroservice:
-    image: cadastroservice
     build:
       context: .
       dockerfile: CadastroService/Dockerfile
@@ -36,13 +45,15 @@ services:
     networks:
       - mynetwork
     ports:
-      - "9000:9000"
+      - "9000:9000"   # Expondo a aplicação para a porta 9000
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://*:9000
+      - RABBITMQ_HOST=rabbitmq
+      - POSTGRES_HOST=postgres
 
+  # Consulta Service
   consultaservice:
-    image: consultaservice
     build:
       context: .
       dockerfile: ConsultaService/Dockerfile
@@ -52,11 +63,14 @@ services:
     networks:
       - mynetwork
     ports:
-      - "9010:9010"
+      - "9010:9010"  # Expondo a aplicação para a porta 9010
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://*:9010
+      - RABBITMQ_HOST=rabbitmq
+      - POSTGRES_HOST=postgres
 
+  # PostgreSQL
   postgres:
     image: postgres:latest
     restart: always
@@ -65,12 +79,13 @@ services:
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: postgres
     ports:
-      - "5432:5432"
+      - "5432:5432"  # Expondo a porta 5432 para o banco de dados
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - mynetwork
 
+  # Prometheus para monitoramento
   prometheus:
     image: prom/prometheus
     volumes:
@@ -80,6 +95,7 @@ services:
     networks:
       - mynetwork
 
+  # Grafana para visualização
   grafana:
     image: grafana/grafana
     ports:
@@ -91,11 +107,12 @@ services:
     networks:
       - mynetwork
 
+  # RabbitMQ (Filas de mensagens)
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5672:5672"  # Porta de comunicação do RabbitMQ
+      - "15672:15672"  # Interface web de gerenciamento
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -108,3 +125,4 @@ volumes:
 
 networks:
   mynetwork:
+    driver: bridge
