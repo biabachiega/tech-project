@@ -15,8 +15,7 @@ namespace CadastroService.Controllers
         public ContatosController(ApplicationDbContext dbContext, RabbitMqService rabbitMqService)
         {
             _dbContext = dbContext;
-            _rabbitMqService = rabbitMqService; // Agora ele será passado pela injeção de dependência
-        }
+            _rabbitMqService = rabbitMqService;          }
 
 
 
@@ -35,19 +34,15 @@ namespace CadastroService.Controllers
 
                 try
                 {
-                    // Serializa o contato
-                    string contatosJson = JsonSerializer.Serialize(contatos);
+                                         string contatosJson = JsonSerializer.Serialize(contatos);
                     var messageObject = new
                     {
                         action = "create",
-                        data = JsonSerializer.Deserialize<object>(contatosJson) // Desserialize para incluir no novo objeto
-                    };
+                        data = JsonSerializer.Deserialize<object>(contatosJson)                      };
                    
-                    string message = JsonSerializer.Serialize(messageObject); // Serialize o objeto completo
+                    string message = JsonSerializer.Serialize(messageObject);  
 
-
-                    // Envia para o RabbitMQ
-                    _rabbitMqService.SendMessage("contatosQueue", message);
+                                         _rabbitMqService.SendMessage("contatosQueue", message);
 
                     return Ok(new ApiResponse<ContatosRequest>
                     {
@@ -82,8 +77,7 @@ namespace CadastroService.Controllers
                         data = new { id = id }
                     });
 
-                    _rabbitMqService.SendMessage("contatosQueue", message); // Envia para a fila "contatosQueue"
-
+                    _rabbitMqService.SendMessage("contatosQueue", message);  
                     return Ok(new ApiResponse<ContatosResponse>
                     {
                         Message = $"Contato com Id enviado para fila de exclusão com sucesso!",
@@ -144,8 +138,7 @@ namespace CadastroService.Controllers
                     }
                 });
 
-                _rabbitMqService.SendMessage("contatosQueue", message); // Envia para a fila "contatosQueue"
-
+                _rabbitMqService.SendMessage("contatosQueue", message);  
                 return Ok(new ApiResponse<ContatosResponse>
                 {
                     Message = "Dados de atualização enviados para a fila com sucesso!",

@@ -16,8 +16,7 @@ public class MetricsService
     {
         var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
         cpuCounter.NextValue();
-        System.Threading.Thread.Sleep(1000); // Aguardar 1 segundo para obter a próxima leitura
-        return cpuCounter.NextValue();
+        System.Threading.Thread.Sleep(1000);          return cpuCounter.NextValue();
     }
 
     private double GetMemoryUsage()
