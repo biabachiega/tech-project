@@ -11,11 +11,12 @@ namespace CadastroService.Controllers
     public class ContatosController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly RabbitMqService _rabbitMqService;
-        public ContatosController(ApplicationDbContext dbContext, RabbitMqService rabbitMqService)
+        private readonly IRabbitMqService _rabbitMqService;
+
+        public ContatosController(ApplicationDbContext dbContext, IRabbitMqService rabbitMqService)
         {
             _dbContext = dbContext;
-            _rabbitMqService = rabbitMqService; // Agora ele será passado pela injeção de dependência
+            _rabbitMqService = rabbitMqService;
         }
 
 
