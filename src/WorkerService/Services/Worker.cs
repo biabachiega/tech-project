@@ -103,7 +103,7 @@ namespace WorkerService.Services
             }
         }
 
-        private async Task<bool> ProcessarMensagemAsync(string action, ContatosResponse data)
+        public async Task<bool> ProcessarMensagemAsync(string action, ContatosResponse data)
         {
             using var scope = _scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

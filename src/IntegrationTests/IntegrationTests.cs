@@ -1,64 +1,88 @@
-/*using IntegrationTests.Repositories;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Npgsql;
-using ProjetoTech.Entities;
-using ProjetoTech.Services;
-using System.Xml;
-using ConsultaService.Controllers;
+using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
+using System.Threading.Tasks;
+using WorkerService.Entities;
+using WorkerService.Services;
+using Xunit;
 
-namespace IntegrationTests
+namespace WorkerService.Tests
 {
     public class IntegrationTests
     {
-        private readonly DbContextOptions<ApplicationDbContext> _options;
-        private readonly ContatosController _controller;
-        private readonly TestIntegrationDbContextRepository _context;
+        private readonly ServiceProvider _serviceProvider;
+        private readonly ApplicationDbContext _dbContext;
 
         public IntegrationTests()
         {
-            _options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=1234")
-                .Options;
-            _context = new TestIntegrationDbContextRepository(_options);
-            _controller = new ContatosController(_context);
-            using var context = new ApplicationDbContext(_options); 
-            context.Database.Migrate();
+            var services = new ServiceCollection();
+
+            // Configurando o banco de dados em memória para o teste
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseInMemoryDatabase("TestDb"));
+
+            // Registrando o IServiceScopeFactory para ser usado no Worker
+            services.AddSingleton<IServiceScopeFactory>(sp => sp.GetRequiredService<IServiceScopeFactory>());
+
+            _serviceProvider = services.BuildServiceProvider();
+            _dbContext = _serviceProvider.GetRequiredService<ApplicationDbContext>();
         }
 
         [Fact]
-        public async Task CanInsertAndRetrieveContato()
+        public async Task Worker_Should_Process_Create_Message_Successfully()
         {
-            try
-            {
-                using (var conn = new NpgsqlConnection("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=1234"))
-                {
-                    await conn.OpenAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Failed to connect to PostgreSQL", ex);
-            }
+            // Arrange
+            var worker = new Worker(_serviceProvider.GetRequiredService<IServiceScopeFactory>());
 
-            using var context = new ApplicationDbContext(_options);
-            var contato = new ContatosRequest
+            // Criação de dados fictícios para simular a mensagem
+            var action = "create";
+            var data = new ContatosResponse
             {
-                nome = "Test Contato",
-                email = "test@exemplo.com",
-                telefone = "(11) 91234-5678"
+                nome = "John Doe",
+                email = "john.doe@example.com",
+                telefone = "123456789"
             };
 
-           // await _controller.CreateContact(contato);
+            // Simulando a execução do método ProcessarMensagemAsync
+            var result = await worker.ProcessarMensagemAsync(action, data);
 
-            // Recuperar
-            var retrievedContato = await context.Contatos.FirstOrDefaultAsync(c => c.email == "test@exemplo.com");
+            // Assert
+            var contato = await _dbContext.Contatos.FirstOrDefaultAsync(c => c.email == data.email);
+            Assert.NotNull(contato);
+            Assert.Equal(data.nome, contato.nome);
+            Assert.Equal(data.telefone, contato.telefone);
+            Assert.Equal(action, "create");
+            Assert.True(result);
+        }
 
-            Assert.NotNull(retrievedContato);
-            Assert.Equal(contato.nome, retrievedContato.nome);
-            Assert.Equal(contato.email, retrievedContato.email);
-            Assert.Equal(contato.telefone, retrievedContato.telefone);
+        [Fact]
+        public async Task Worker_Should_Process_Delete_Message_Successfully()
+        {
+            // Arrange: Criando um contato no banco para deletar
+            var existingContact = new ContatosResponse
+            {
+                nome = "Delete Me",
+                email = "delete.me@example.com",
+                telefone = "111111111"
+            };
+
+            _dbContext.Contatos.Add(existingContact);
+            await _dbContext.SaveChangesAsync();
+
+            // Simulando a exclusão do contato
+            var action = "delete";
+            var dataToDelete = new ContatosResponse
+            {
+                id = existingContact.id
+            };
+
+            var worker = new Worker(_serviceProvider.GetRequiredService<IServiceScopeFactory>());
+            var result = await worker.ProcessarMensagemAsync(action, dataToDelete);
+
+            // Assert
+            var contato = await _dbContext.Contatos.FirstOrDefaultAsync(c => c.id == existingContact.id);
+            Assert.Null(contato); // O contato foi removido
+            Assert.True(result);
         }
     }
-}*/
+}

@@ -17,7 +17,7 @@ namespace CadastroService.Services
             };
         }
 
-        public void SendMessage(string queueName, string message)
+        public virtual void SendMessage(string queueName, string message)
         {
             using var connection = _factory.CreateConnection();
             using var channel = connection.CreateModel();
