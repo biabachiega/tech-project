@@ -34,7 +34,7 @@ namespace CadastroService.Controllers
 
                 try
                 {
-                                         string contatosJson = JsonSerializer.Serialize(contatos);
+                    string contatosJson = JsonSerializer.Serialize(contatos);
                     var messageObject = new
                     {
                         action = "create",
@@ -129,7 +129,7 @@ namespace CadastroService.Controllers
                 string message = JsonSerializer.Serialize(new
                 {
                     action = "update",
-                    data = new
+                    data = new ContatosResponse
                     {
                         id = id,
                         nome = updatedResource.nome,
