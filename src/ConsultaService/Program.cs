@@ -1,6 +1,7 @@
 using ConsultaService.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMetricServer(); // Exposição de métricas gerais em /metrics
+app.UseHttpMetrics();  // Coleta de métricas HTTP automáticas
 
 app.UseRouting();
 

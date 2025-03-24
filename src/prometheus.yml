@@ -17,16 +17,37 @@ rule_files:
 
 # Configuração de coleta
 scrape_configs:
-  # Coleta das próprias métricas do Prometheus
+  # Coleta do próprio Prometheus
   - job_name: "prometheus"
     static_configs:
       - targets: ["localhost:9090"]
 
-  # Coleta das métricas da sua aplicação
-  - job_name: "minha_aplicacao"
+  # Coleta de Projetotech
+  - job_name: "projetotech"
     static_configs:
       - targets: ["projetotech:8080"]
     metrics_path: "/metrics"
     scheme: "http"
-    scrape_interval: 15s
-    scrape_timeout: 10s
+
+  # Coleta de Cadastro Service
+  - job_name: "cadastroservice"
+    static_configs:
+      - targets: ["cadastroservice:9000"]
+    metrics_path: "/metrics"
+    scheme: "http"
+
+  # Coleta de Consulta Service
+  - job_name: "consultaservice"
+    static_configs:
+      - targets: ["consultaservice:9010"]
+    metrics_path: "/metrics"
+    scheme: "http"
+
+  # Coleta do API Gateway
+  - job_name: "api-gateway"
+    static_configs:
+      - targets: ["OcelotApiGateway:5003"]
+    metrics_path: "/metrics"
+    scheme: "https"
+    tls_config:
+      insecure_skip_verify: true
