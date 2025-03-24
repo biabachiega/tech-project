@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsultaService", "Consulta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkerService", "WorkerService\WorkerService.csproj", "{21242F3D-8D03-4BBB-ADE5-66D733A4CD6C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OcelotApiGateway", "OcelotApiGateway\OcelotApiGateway.csproj", "{BE18AC6F-F5E4-4E55-8391-D4726296EE47}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{21242F3D-8D03-4BBB-ADE5-66D733A4CD6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21242F3D-8D03-4BBB-ADE5-66D733A4CD6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21242F3D-8D03-4BBB-ADE5-66D733A4CD6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE18AC6F-F5E4-4E55-8391-D4726296EE47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE18AC6F-F5E4-4E55-8391-D4726296EE47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE18AC6F-F5E4-4E55-8391-D4726296EE47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE18AC6F-F5E4-4E55-8391-D4726296EE47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

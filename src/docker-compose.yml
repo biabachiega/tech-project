@@ -1,6 +1,22 @@
 version: '3.8'
 
 services:
+ # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: OcelotApiGateway/Dockerfile
+    depends_on:
+      - cadastroservice
+      - consultaservice
+    networks:
+      - mynetwork
+    ports:
+      - "5003:5003"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://*:5003
+
   # Worker Service - Serviço de trabalho
   workerservice:
     build:
