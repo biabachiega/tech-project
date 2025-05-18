@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: consultaservice
+  labels:
+    app: consultaservice
+    tier: backend
   annotations:
     app.kubernetes.io/description: "Serviço responsável por consultar contatos."
     app.kubernetes.io/author: "Ana e Daniel"

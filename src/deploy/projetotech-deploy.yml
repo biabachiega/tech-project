@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: projetotech
+  labels:
+    app: projetotech
+    tier: backend
   annotations:
     author: "Ana e Daniel"
     description: "Microsserviço responsável pelas funcionalidades principais do sistema."

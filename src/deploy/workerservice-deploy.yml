@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: workerservice
+  labels:
+    app: workerservice
+    tier: backend
   annotations:
     author: "Ana e Daniel"
     description: "Serviço worker responsável pela fila do rabbitmq."

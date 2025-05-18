@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbitmq
+  labels:
+    app: rabbitmq
   annotations:
     author: "Ana e Daniel"
     description: "RabbitMQ com persistência de dados via PVC"

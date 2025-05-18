@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
+  labels:
+    app: postgres
+    tier: banco
   annotations:
     app.kubernetes.io/author: Ana e Daniel
     app.kubernetes.io/description: Banco de dados PostgreSQL com PVC e configurações externas
