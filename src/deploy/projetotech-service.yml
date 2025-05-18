@@ -2,12 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: projetotech
+  annotations:
+    author: "Ana e Daniel"
+    description: "Service que expõe o projetotech internamente e via NodePort para o Minikube."
 spec:
   selector:
     app: projetotech
   ports:
     - protocol: TCP
-      port: 8080       # Porta interna do cluster
-      targetPort: 8080 # Porta no container
-      nodePort: 31234  # Porta do host (Minikube) — opcional
+      port: 8080
+      targetPort: 8080
+      nodePort: 31234
   type: NodePort

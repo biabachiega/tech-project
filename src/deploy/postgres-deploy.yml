@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
+  annotations:
+    app.kubernetes.io/author: Ana e Daniel
+    app.kubernetes.io/description: Banco de dados PostgreSQL com PVC e configurações externas
 spec:
   replicas: 1
   selector:
@@ -19,8 +22,24 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: "postgres"
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_DB
             - name: POSTGRES_USER
-              value: "postgres"
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
-              value: "1234"
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc

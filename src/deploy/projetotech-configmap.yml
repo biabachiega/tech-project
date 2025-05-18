@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: projetotech-config
+  annotations:
+    author: "Ana e Daniel"
+    description: "Configurações de ambiente e conexão do serviço projetotech."
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  ASPNETCORE_URLS: "http://*:8080"
+  ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=postgres;Username=postgres;Password=1234"
+  RABBITMQ_HOST: "rabbitmq"

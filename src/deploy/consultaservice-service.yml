@@ -6,6 +6,7 @@ spec:
   selector:
     app: consultaservice
   ports:
-  - protocol: TCP
-    port: 9010
-    targetPort: 9010
+    - protocol: TCP
+      port: 9010
+      targetPort: 9010
+  type: ClusterIP

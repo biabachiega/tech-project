@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: projetotech
+  annotations:
+    author: "Ana e Daniel"
+    description: "Microsserviço responsável pelas funcionalidades principais do sistema."
 spec:
   replicas: 1
   selector:
@@ -15,16 +18,9 @@ spec:
       containers:
         - name: projetotech
           image: biabachiega/projetotech:latest
-          imagePullPolicy: IfNotPresent  # Usa a imagem do Minikube
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
-          env:
-            - name: ASPNETCORE_ENVIRONMENT
-              value: Development
-            - name: ASPNETCORE_URLS
-              value: http://*:8080
-            - name: ConnectionStrings__DefaultConnection
-              value: Host=postgres;Port=5432;Database=postgres;Username=postgres;Password=1234
-            - name: RABBITMQ_HOST
-              value: rabbitmq
-
+          envFrom:
+            - configMapRef:
+                name: projetotech-config

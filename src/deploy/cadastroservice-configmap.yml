@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cadastroservice-config
+data:
+  RABBITMQ_HOST: "rabbitmq"
+  POSTGRES_HOST: "postgres"

@@ -2,6 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-gateway
+  labels:
+    app: api-gateway
+    tier: backend
+  annotations:
+    app.kubernetes.io/created-by: "Ana e Daniel"
+    app.kubernetes.io/description: "Gateway de entrada do sistema. Responsável por rotear as requisições para os microsserviços usando Ocelot."
 spec:
   replicas: 1
   selector:
@@ -11,6 +17,10 @@ spec:
     metadata:
       labels:
         app: api-gateway
+        tier: backend
+      annotations:
+        app.kubernetes.io/created-by: "Ana e Daniel"
+        app.kubernetes.io/description: "Gateway de entrada do sistema. Responsável por rotear as requisições para os microsserviços usando Ocelot."
     spec:
       containers:
         - name: api-gateway

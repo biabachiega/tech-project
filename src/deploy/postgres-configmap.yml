@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  annotations:
+    app.kubernetes.io/author: Ana e Daniel
+    app.kubernetes.io/description: Configurações do banco de dados PostgreSQL
+data:
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: "1234"

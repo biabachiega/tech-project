@@ -2,8 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: consultaservice
+  annotations:
+    app.kubernetes.io/description: "Serviço responsável por consultar contatos."
+    app.kubernetes.io/author: "Ana e Daniel"
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: consultaservice
@@ -13,16 +16,22 @@ spec:
         app: consultaservice
     spec:
       containers:
-      - name: consultaservice
-        image: biabachiega/consultaservice:latest
-        ports:
-        - containerPort: 9010
-        env:
-        - name: ASPNETCORE_ENVIRONMENT
-          value: Development
-        - name: ASPNETCORE_URLS
-          value: http://*:9010
-        - name: RABBITMQ_HOST
-          value: rabbitmq
-        - name: POSTGRES_HOST
-          value: postgres
+        - name: consultaservice
+          image: biabachiega/consultaservice:latest
+          ports:
+            - containerPort: 9010
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ASPNETCORE_URLS
+              value: http://*:9010
+            - name: RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: consultaservice-config
+                  key: RABBITMQ_HOST
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: consultaservice-config
+                  key: POSTGRES_HOST

@@ -2,6 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: api-gateway
+  labels:
+    app: api-gateway
+    tier: backend
+  annotations:
+    app.kubernetes.io/created-by: "Ana e Daniel"
+    app.kubernetes.io/description: "Service do API Gateway para expor porta 5003 internamente no cluster."
 spec:
   selector:
     app: api-gateway

@@ -10,4 +10,4 @@ spec:
     - name: http
       port: 9000
       targetPort: 9000
-      nodePort: 31651  # opcional (ou remova para deixar o Kubernetes escolher)
+      nodePort: 31651

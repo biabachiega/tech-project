@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: workerservice-config
+  annotations:
+    author: "Ana e Daniel"
+    description: "Configurações de ambiente e dependências do serviço WorkerService."
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  RABBITMQ_HOST: "rabbitmq"
+  POSTGRES_HOST: "postgres"
