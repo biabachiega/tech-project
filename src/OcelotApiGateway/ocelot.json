@@ -10,7 +10,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "host.docker.internal",
+          "Host": "cadastroservice",
           "Port": 9000
         }
       ],
@@ -28,7 +28,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "host.docker.internal",
+          "Host": "cadastroservice",
           "Port": 9000
         }
       ],
@@ -46,25 +46,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "host.docker.internal",
-          "Port": 9000
-        }
-      ],
-      "RateLimitOptions": {
-        "EnableRateLimiting": true,
-        "Period": "10s",
-        "Limit": 3,
-        "PeriodTimespan": 10
-      }
-    },
-    {
-      "UpstreamPathTemplate": "/gateway/Contatos/ErroDLQ",
-      "UpstreamHttpMethod": [ "Post" ],
-      "DownstreamPathTemplate": "/Contatos/ErroDLQ",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "host.docker.internal",
+          "Host": "cadastroservice",
           "Port": 9000
         }
       ],
@@ -82,7 +64,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "host.docker.internal",
+          "Host": "consultaservice",
           "Port": 9010
         }
       ],
@@ -100,7 +82,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "host.docker.internal",
+          "Host": "consultaservice",
           "Port": 9010
         }
       ],
@@ -118,7 +100,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "host.docker.internal",
+          "Host": "consultaservice",
           "Port": 9010
         }
       ],

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consultaservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consultaservice
+  template:
+    metadata:
+      labels:
+        app: consultaservice
+    spec:
+      containers:
+      - name: consultaservice
+        image: biabachiega/consultaservice:latest
+        ports:
+        - containerPort: 9010
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Development
+        - name: ASPNETCORE_URLS
+          value: http://*:9010
+        - name: RABBITMQ_HOST
+          value: rabbitmq
+        - name: POSTGRES_HOST
+          value: postgres

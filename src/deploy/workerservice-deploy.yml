@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workerservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workerservice
+  template:
+    metadata:
+      labels:
+        app: workerservice
+    spec:
+      containers:
+      - name: workerservice
+        image: biabachiega/workerservice:latest
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Development
+        - name: RABBITMQ_HOST
+          value: rabbitmq
+        - name: POSTGRES_HOST
+          value: postgres

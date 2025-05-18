@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cadastroservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cadastroservice
+  template:
+    metadata:
+      labels:
+        app: cadastroservice
+    spec:
+      containers:
+      - name: cadastroservice
+        image: biabachiega/cadastroservice:latest
+        ports:
+        - containerPort: 9000
+        env:
+        - name: ASPNETCORE_URLS
+          value: http://*:9000
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Development
+        - name: RABBITMQ_HOST
+          value: rabbitmq
+        - name: POSTGRES_HOST
+          value: postgres
