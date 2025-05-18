@@ -5,3 +5,4 @@ metadata:
 data:
   RABBITMQ_HOST: "rabbitmq"
   POSTGRES_HOST: "postgres"
+
